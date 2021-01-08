@@ -20,3 +20,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 
 Route::get('/testcode/{countyName}', [TestCodeController::class, 'index']);
+Route::get('/searchbycountry/{countyName}', [TestCodeController::class, 'searchByCountry']);
