@@ -18,7 +18,7 @@ class CreateUniversitiesTable extends Migration
             $table->string('name');
             $table->string('webpages');
             $table->string('domains');
-            $table->string('state-province')->nullable();
+            $table->string('state_province')->nullable();
             $table->integer('ttl');
             $table->integer('country_id')->nullable();;
             $table->timestamps();
