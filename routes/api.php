@@ -20,4 +20,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 
 Route::get('/testcode/{countyName}', [TestCodeController::class, 'index']);
-Route::get('/searchbycountry/{countyName}', [TestCodeController::class, 'searchByCountry']);
+
+
+
+
+Route::group(['middleware' => 'cors'], function () {
+    Route::get('/searchbycountry/{countyName}', [TestCodeController::class, 'searchByCountry']);
+});
+

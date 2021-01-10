@@ -9,17 +9,23 @@ use Illuminate\Support\Facades\DB;
 
 class TestCodeController extends Controller
 {
+
+
+
     public function getUniversitiesFromLocal($countryName){
         // $universityResults = Country::where('country', $countryName)->get()[0]->universities;
         $universityResults = DB::table('countries')
                                 ->join('universities', 'countries.id', '=', 'universities.country_id')
                                 ->select('country', 'alphaCode', 'name', 'webpages', 'domains', 'state_province')
+                                ->where('country', '=' , $countryName)
                                 ->get();
 
         $result = new \stdClass;
         $result->status = "OK";
-        $result->description = $universityResults;
-        echo json_encode($result);
+        $result->content = $universityResults;
+  
+        return Response (json_encode($result));
+     
     }
 
     //get request and serch by country
@@ -28,10 +34,10 @@ class TestCodeController extends Controller
         $countryResults = Country::where('country', $countryName)->get();
 
         if(count($countryResults)){
-            $this->getUniversitiesFromLocal($countryName);
+            return $this->getUniversitiesFromLocal($countryName);
 
         }else{
-            $this->saveUniversitiesByCountry($countryName);
+            return $this->saveUniversitiesByCountry($countryName);
  
         }       
     }
@@ -59,12 +65,14 @@ class TestCodeController extends Controller
     //save all universities by specified country
     public function saveUniversitiesByCountry($countryName){
         $response = Http::get('http://universities.hipolabs.com/search?country=' . $countryName);
-
+      
         //check if get >= 1 reslult, if no result return.
         if(!count(json_decode($response)))
             {
+                dd('true');
                 return 'true';
             }else{
+               
                 // return result to frontend.
                
                 //used to save all university obj
@@ -86,8 +94,9 @@ class TestCodeController extends Controller
 
                 $result = new \stdClass;
                 $result->status = "OK";
-                $result->description = ($universities);
-                echo json_encode($result);
+                $result->content = ($universities);
+
+                // echo json_encode($result);
             }
         $resultArr = json_decode($response, true);
         
@@ -120,6 +129,8 @@ class TestCodeController extends Controller
             University::create(['ttl' => $this->getRandTime(), 'name' => $name, 'webpages'=> $web_pages,  'domains' => $domains, 'country_id'=>$newCountryId]);
 
         }
+
+        return Response (json_encode($result));
 
     }
     
