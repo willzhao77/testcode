@@ -26,5 +26,9 @@ Route::get('/testcode/{countyName}', [TestCodeController::class, 'index']);
 
 Route::group(['middleware' => 'cors'], function () {
     Route::get('/searchbycountry/{countyName}', [TestCodeController::class, 'searchByCountry']);
+    Route::post('/freshuniversities', [TestCodeController::class, 'freshUniversities']);
+
+
+    Route::get('/test/{value}', [TestCodeController::class, 'updateUniversity']);
 });
 

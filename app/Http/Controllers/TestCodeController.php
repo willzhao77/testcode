@@ -10,6 +10,60 @@ use Illuminate\Support\Facades\DB;
 class TestCodeController extends Controller
 {
 
+    //receive university names, and update from source API
+    public function freshUniversities(){
+        $universitiesArr = json_decode($_POST["myData"]);
+
+        $universities1 = [];
+        foreach($universitiesArr as $university){
+            $newUniversity = $this->updateUniversity($university->name);
+            array_push($universities1, $newUniversity);
+        }
+
+        return Response (json_encode($universities1));
+
+        
+    }
+
+
+    // update university info from source API
+    public function updateUniversity($universityName){
+        $response = Http::get('http://universities.hipolabs.com/search?name=' . $universityName);
+        if(!count(json_decode($response)))
+            {
+                dd('no result');
+                return 'true';
+            }else{
+                $item = json_decode($response)[0];
+                
+
+                DB::table('universities')
+                        ->where('name', $universityName)
+                        ->update([
+                                'ttl'               => $this->getRandTime(), 
+                                'webpages'          => implode(" ",(array)$item->web_pages),  
+                                'domains'           => implode(" ",(array)$item->domains),
+                                'state_province'    => $item->{'state-province'}
+                        ]);
+
+                // prepare data for frontend
+                $university = new \stdClass;
+                $university->country = $item->country;
+                $university->alphaCode = $item->alpha_two_code;
+                $university->name = $item->name;
+
+                $university->webpages = implode(" ",(array)$item->web_pages);
+                
+                $university->domains =  implode(" ",(array)$item->domains);
+                $university->state_province = $item->{'state-province'};
+
+
+                return $university;
+
+            }
+    }
+
+
 
 
     public function getUniversitiesFromLocal($countryName){
