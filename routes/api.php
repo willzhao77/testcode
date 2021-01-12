@@ -29,6 +29,6 @@ Route::group(['middleware' => 'cors'], function () {
     Route::post('/freshuniversities', [TestCodeController::class, 'freshUniversities']);
 
 
-    Route::get('/test/{value}', [TestCodeController::class, 'updateUniversity']);
+    Route::get('/test', [TestCodeController::class, 'updateUniversitiesFromSource']);
 });
 

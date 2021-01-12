@@ -10,6 +10,50 @@ use Illuminate\Support\Facades\DB;
 class TestCodeController extends Controller
 {
 
+
+    public function updateExpiredUniversitiesFromSource(){
+
+        // get universities which TTL expired
+        $oldUniversities = $this->ttlExpired();
+        $newUniversities = $this->updateUniversities($oldUniversities);
+        
+        // dd($newUniversities);
+        return Response (json_encode($newUniversities));    
+
+    }
+
+    // get TTL expired data
+    public function ttlExpired(){
+        $universityResults = DB::table('universities')
+                                ->select('name')
+                                // ->where('updated_at' , '>' , '800 ')
+                                ->where(  'ttl', '<' , (DB::raw( 'ABS(TIMESTAMPDIFF(SECOND, NOW(), updated_at))' )) )
+                                ->get();
+        return $universityResults;
+    }
+
+
+
+    
+    // (DB::raw( 'ABS(TIMESTAMPDIFF(SECOND, NOW(), created_at))' )) 
+
+
+    // update multiple universities
+    public function updateUniversities($universities){
+        
+        $newUniversities = [];
+        foreach($universities as $university){
+           
+            $newUniversity = $this->updateUniversity($university->name);
+            
+            array_push($newUniversities, $newUniversity);
+        }
+      
+        return $newUniversities;     
+    }
+
+
+
     //receive university names, and update from source API
     public function freshUniversities(){
         $universitiesArr = json_decode($_POST["myData"]);
@@ -20,10 +64,11 @@ class TestCodeController extends Controller
             array_push($universities1, $newUniversity);
         }
 
-        return Response (json_encode($universities1));
-
-        
+        return Response (json_encode($universities1));        
     }
+
+
+
 
 
     // update university info from source API
@@ -43,7 +88,8 @@ class TestCodeController extends Controller
                                 'ttl'               => $this->getRandTime(), 
                                 'webpages'          => implode(" ",(array)$item->web_pages),  
                                 'domains'           => implode(" ",(array)$item->domains),
-                                'state_province'    => $item->{'state-province'}
+                                'state_province'    => $item->{'state-province'},
+                                'updated_at'        => now()
                         ]);
 
                 // prepare data for frontend
